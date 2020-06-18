@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>three.js css3d - panorama</title>
+    <style>
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<script src="http://www.yanhuangxueyuan.com/threejs/build/three.min.js"></script> <!-- 此处引入threejs基础类 -->
+<script src="./GLTFLoader3.js"></script> <!-- 此处引入threejs基础类 -->
+<script src="http://www.yanhuangxueyuan.com/threejs/examples/js/controls/OrbitControls.js"></script>
+<script type="text/javascript" src="./dat.gui.min.js"></script>
+<div id="container"></div>
+<script>
+var clock = new THREE.Clock();
+var scene = new THREE.Scene();
+
+//变量控制器
+gui = {
+    modelX:0,
+    color: '#66ccff'
+};
+var isFly = new function () {
+    this.Isfly = true
+    this.FlySpeed = 0
+};
+var datGui = new dat.GUI();
+datGui.add(gui,"modelX",0,1000);
+datGui.addColor(gui, "color");
+datGui.add(isFly, 'Isfly');
+datGui.add(isFly, 'FlySpeed',0,10);
+datGui.open();
+
+var axes = new THREE.AxisHelper(30);
+scene.add(axes);
+// var gridHelper = new THREE.GridHelper( 100, 30, 0x2C2C2C, 0x888888 );
+// gridHelper.position.y = -10;
+// scene.add(gridHelper);
+
+
+
+scene.background = new THREE.Color(0xA9A9A9)
+var camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 50000 );
+camera.rotation.y = 45/180*Math.PI
+camera.position.x = 800
+camera.position.y = 100
+camera.position.z = 1000
+//kongzhiqi
+controls = new THREE.OrbitControls(camera)
+controls.addEventListener('change',renderer)
+
+hlight = new THREE.AmbientLight(0x000000,100)
+scene.add(hlight)
+
+//son light
+directionalLight = new THREE.DirectionalLight(0xA9A9A9,100000)
+directionalLight.position.set(0,0,0)
+directionalLight.castShadow = true
+scene.add(directionalLight)
+
+var light = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 );
+scene.add( light );
+// light = new THREE.PointLight(0xA9A9A9,10)
+// light.position.set(0,3000,0)
+// scene.add(light)
+
+light2 = new THREE.PointLight(0xA9A9A9,5)
+light2.position.set(0,-1000,0)
+scene.add(light2)
+
+// light3 = new THREE.PointLight(0xA9A9A9,10)
+// light3.position.set(0,1000,-5000)
+// scene.add(light3)
+
+// light4 = new THREE.PointLight(0xA9A9A9,10)
+// light4.position.set(-5000,3000,0)
+// scene.add(light4)
+
+
+var renderer = new THREE.WebGLRenderer({antialias:true})
+renderer.setSize(window.innerWidth,window.innerHeight)
+document.body.appendChild(renderer.domElement)
+
+let loader = new THREE.GLTFLoader()
+loader.load('234/scene.gltf',function(gltf){
+    car = gltf.scene.children[0]
+    
+    car.scale.set(0.5,0.5,0.5)
+    scene.add(gltf.scene)
+    mixer = new THREE.AnimationMixer(gltf.scene);
+	mixer.clipAction(gltf.animations[0]).play();
+    animate()
+})
+function animate(){
+    requestAnimationFrame(animate)
+    if(isFly.Isfly){
+        car.translateX(isFly.FlySpeed)
+    }else{
+        car.position.x = gui.modelX;
+    }
+    var delta = clock.getDelta();
+			 if (mixer != null) {
+			     mixer.update(delta);
+			};
+    renderer.render(scene,camera)
+    mixer.update(clock.getDelta());
+}
+</script>
+</body>
+</html>
